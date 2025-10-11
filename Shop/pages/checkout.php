@@ -431,9 +431,52 @@ $paypal_mode = $settings->getPayPalMode();
             const zipFeedback = document.getElementById('zip-feedback');
             const cityFeedback = document.getElementById('city-feedback');
             
-            const address = addressField ? addressField.value.trim() : '';
+            let address = addressField ? addressField.value.trim() : '';
             const zip = zipField ? zipField.value.trim() : '';
             const city = cityField ? cityField.value.trim() : '';
+            
+            // Auto-Korrektur für zusammengeschriebene Straßennamen
+            if (address && address.length > 0) {
+                const originalAddress = address;
+                
+                // Erkenne zusammengeschriebene Straßennamen und korrigiere sie
+                address = address
+                    // "...straße" -> "... Straße"
+                    .replace(/([a-züäöß]+)(straße)(\s*\d+[a-zA-Z]?)/gi, '$1 Straße$3')
+                    // "...gasse" -> "... Gasse" 
+                    .replace(/([a-züäöß]+)(gasse)(\s*\d+[a-zA-Z]?)/gi, '$1 Gasse$3')
+                    // "...weg" -> "... Weg"
+                    .replace(/([a-züäöß]+)(weg)(\s*\d+[a-zA-Z]?)/gi, '$1 Weg$3')
+                    // "...platz" -> "... Platz"
+                    .replace(/([a-züäöß]+)(platz)(\s*\d+[a-zA-Z]?)/gi, '$1 Platz$3')
+                    // "...allee" -> "... Allee"
+                    .replace(/([a-züäöß]+)(allee)(\s*\d+[a-zA-Z]?)/gi, '$1 Allee$3')
+                    // "...ring" -> "... Ring"
+                    .replace(/([a-züäöß]+)(ring)(\s*\d+[a-zA-Z]?)/gi, '$1 Ring$3')
+                    // "...damm" -> "... Damm"
+                    .replace(/([a-züäöß]+)(damm)(\s*\d+[a-zA-Z]?)/gi, '$1 Damm$3');
+                
+                // Wenn Korrektur vorgenommen wurde, zeige es dem User
+                if (address !== originalAddress && addressField) {
+                    console.log('Auto-corrected address:', originalAddress, '->', address);
+                    addressField.value = address; // Aktualisiere das Eingabefeld
+                    
+                    // Kurzes visuelles Feedback
+                    if (addressFeedback) {
+                        const oldClass = addressFeedback.className;
+                        const oldText = addressFeedback.textContent;
+                        
+                        addressFeedback.textContent = `Auto-korrigiert: ${address}`;
+                        addressFeedback.className = 'form-text text-info';
+                        
+                        // Nach 2 Sekunden zurück zu normal
+                        setTimeout(() => {
+                            addressFeedback.textContent = oldText;
+                            addressFeedback.className = oldClass;
+                        }, 2000);
+                    }
+                }
+            }
             
             console.log('Smart validation - Address:', address, 'ZIP:', zip, 'City:', city);
             
@@ -448,6 +491,9 @@ $paypal_mode = $settings->getPayPalMode();
                         addressFeedback.textContent = 'Bitte geben Sie eine Hausnummer ein (z.B. Musterstraße 12)';
                         addressFeedback.className = 'form-text text-danger';
                     }
+                    
+                    // Reset validation flag
+                    addressValidationRunning = false;
                     return;
                 }
             }
@@ -582,6 +628,9 @@ $paypal_mode = $settings->getPayPalMode();
                     } else {
                         console.log('Individual validation failed - not testing combination');
                     }
+                    
+                    // Reset validation flag
+                    addressValidationRunning = false;
                 });
                 return;
             }
@@ -664,6 +713,9 @@ $paypal_mode = $settings->getPayPalMode();
                         { query: `street=${encodeURIComponent(address)}&postalcode=${zip}&country=DE&format=json`, fields: ['address', 'zip'], isSpecialQuery: true }
                     ];
                     executeQueries(combinationQueries);
+                    
+                    // Reset validation flag
+                    addressValidationRunning = false;
                 });
                 return;
             }
@@ -751,6 +803,9 @@ $paypal_mode = $settings->getPayPalMode();
                         { query: `postalcode=${zip}&city=${encodeURIComponent(city)}&country=DE&format=json`, fields: ['zip', 'city'], isSpecialQuery: true }
                     ];
                     executeQueries(combinationQueries);
+                    
+                    // Reset validation flag
+                    addressValidationRunning = false;
                 });
                 return; // Früher Return
             }
@@ -784,6 +839,9 @@ $paypal_mode = $settings->getPayPalMode();
             
             if (queries.length === 0) {
                 console.log('No valid fields to validate');
+                
+                // Reset validation flag
+                addressValidationRunning = false;
                 return;
             }
             
@@ -1023,9 +1081,15 @@ $paypal_mode = $settings->getPayPalMode();
                 }
                 
                 validateCompleteAddress();
+                
+                // Reset validation flag at the end
+                addressValidationRunning = false;
             })
             .catch(error => {
                 console.error('Smart address validation failed:', error);
+                
+                // Reset validation flag on error
+                addressValidationRunning = false;
             });
         }
 
