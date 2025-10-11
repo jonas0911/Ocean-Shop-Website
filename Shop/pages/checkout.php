@@ -258,13 +258,13 @@ $paypal_mode = $settings->getPayPalMode();
                         <div id="paypal-button-container" class="d-none"></div>
                         
                         <!-- Continue Button -->
-                        <button class="btn btn-primary btn-lg w-100" id="continueBtn" onclick="validateAndShowPayPal()">
+                        <button class="btn btn-primary btn-lg w-100" id="continueBtn" onclick="validateAndShowPayPal()" disabled>
                             <i class="fas fa-lock me-2"></i>Zur Zahlung
                         </button>
                         
                         <!-- Demo/Test Button -->
-                        <button class="btn btn-success btn-lg w-100 mt-2" id="demoOrderBtn" onclick="processDemoOrder()">
-                            <i class="fas fa-play me-2"></i>Demo-Bestellung (Test)
+                        <button class="btn btn-secondary btn-lg w-100 mt-2" id="demoOrderBtn" onclick="processDemoOrder()" disabled>
+                            <i class="fas fa-exclamation-triangle me-2"></i>Felder ausfüllen für Demo
                         </button>
                         
                         <!-- Back to Cart -->
@@ -330,6 +330,72 @@ $paypal_mode = $settings->getPayPalMode();
                 feedback.textContent = message;
                 feedback.className = 'form-text ' + (status === 'invalid' ? 'text-danger' : status === 'valid' ? 'text-success' : 'text-muted');
             }
+            
+            // Nach jeder Feld-Update prüfen ob alle Felder valid sind
+            checkAllFieldsValid();
+        }
+        
+        // Prüfe ob alle Pflichtfelder korrekt validiert sind
+        function checkAllFieldsValid() {
+            const requiredFields = ['first_name', 'last_name', 'email', 'address', 'zip', 'city'];
+            const continueBtn = document.getElementById('continueBtn');
+            const demoBtn = document.getElementById('demoOrderBtn');
+            
+            if (!continueBtn) return;
+            
+            let allValid = true;
+            
+            for (const fieldId of requiredFields) {
+                const field = document.getElementById(fieldId);
+                
+                if (!field) {
+                    allValid = false;
+                    break;
+                }
+                
+                // Prüfe ob Feld ausgefüllt ist
+                if (!field.value.trim()) {
+                    allValid = false;
+                    break;
+                }
+                
+                // Prüfe ob Feld als valid markiert ist (grüner Rahmen)
+                if (!field.classList.contains('is-valid')) {
+                    allValid = false;
+                    break;
+                }
+            }
+            
+            // Beide Buttons aktivieren/deaktivieren
+            if (allValid) {
+                // Hauptbutton aktivieren
+                continueBtn.disabled = false;
+                continueBtn.classList.remove('btn-secondary');
+                continueBtn.classList.add('btn-primary');
+                continueBtn.innerHTML = '<i class="fas fa-lock me-2"></i>Zur Zahlung';
+                
+                // Demo-Button aktivieren
+                if (demoBtn) {
+                    demoBtn.disabled = false;
+                    demoBtn.classList.remove('btn-secondary');
+                    demoBtn.classList.add('btn-success');
+                    demoBtn.innerHTML = '<i class="fas fa-play me-2"></i>Demo-Bestellung (Test)';
+                }
+            } else {
+                // Hauptbutton deaktivieren
+                continueBtn.disabled = true;
+                continueBtn.classList.remove('btn-primary');
+                continueBtn.classList.add('btn-secondary');
+                continueBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Alle Felder ausfüllen';
+                
+                // Demo-Button deaktivieren
+                if (demoBtn) {
+                    demoBtn.disabled = true;
+                    demoBtn.classList.remove('btn-success');
+                    demoBtn.classList.add('btn-secondary');
+                    demoBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Felder ausfüllen für Demo';
+                }
+            }
         }
         
         function validateName(fieldId, value) {
@@ -374,6 +440,9 @@ $paypal_mode = $settings->getPayPalMode();
             emailField.classList.add('is-valid');
             feedback.textContent = 'Gültige E-Mail-Adresse';
             feedback.className = 'form-text text-success';
+            
+            // Prüfe ob alle Felder jetzt valid sind
+            checkAllFieldsValid();
             
             return true;
         }
@@ -923,7 +992,7 @@ $paypal_mode = $settings->getPayPalMode();
                         if (result.value.fields.includes('zip')) {
                             const expectedZip = zipField ? zipField.value.trim() : '';
                             // Versuche verschiedene Eigenschaften für PLZ
-                            let foundZip = data.postcode || data.address?.postcode || '';
+                            let foundZip = data.postcode || (data.address && data.address.postcode) || '';
                             
                             // Fallback: Extrahiere PLZ aus display_name wenn nicht direkt verfügbar
                             if (!foundZip && data.display_name) {
@@ -973,7 +1042,7 @@ $paypal_mode = $settings->getPayPalMode();
                                 }
                             } else {
                                 // Bei Kombinationen: Normale Stadt-Validierung
-                                const foundCity = (data.address?.city || data.address?.town || data.address?.village || data.name || '').toLowerCase();
+                                const foundCity = ((data.address && data.address.city) || (data.address && data.address.town) || (data.address && data.address.village) || data.name || '').toLowerCase();
                                 console.log('City check - Expected:', expectedCity, 'Found:', foundCity);
                                 console.log('Full address object:', data.address);
                                 if (expectedCity && foundCity && !foundCity.includes(expectedCity) && !expectedCity.includes(foundCity)) {
@@ -1033,6 +1102,10 @@ $paypal_mode = $settings->getPayPalMode();
                             feedback.textContent = message;
                             feedback.className = 'form-text text-success';
                         }
+                    });
+                    
+                    // Prüfe ob alle Felder jetzt valid sind
+                    checkAllFieldsValid();
                     });
                     
                 } else {
@@ -1418,19 +1491,37 @@ $paypal_mode = $settings->getPayPalMode();
 
         // Demo Order Processing (for testing without PayPal)
         function processDemoOrder() {
-            // Validate required fields first
-            const requiredFields = ['firstName', 'lastName', 'email', 'address', 'zip', 'city'];
-            let isValid = true;
+            // Prüfe erst ob alle Felder valid sind (gleiche Logik wie für Hauptbutton)
+            const requiredFields = ['first_name', 'last_name', 'email', 'address', 'zip', 'city'];
+            const demoBtn = document.getElementById('demoOrderBtn');
             
-            requiredFields.forEach(fieldId => {
+            let allValid = true;
+            
+            for (const fieldId of requiredFields) {
                 const field = document.getElementById(fieldId);
-                if (!field || !field.value.trim()) {
-                    field.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    field.classList.remove('is-invalid');
+                
+                if (!field) {
+                    allValid = false;
+                    break;
                 }
-            });
+                
+                // Prüfe ob Feld ausgefüllt ist
+                if (!field.value.trim()) {
+                    allValid = false;
+                    break;
+                }
+                
+                // Prüfe ob Feld als valid markiert ist (grüner Rahmen)
+                if (!field.classList.contains('is-valid')) {
+                    allValid = false;
+                    break;
+                }
+            }
+            
+            if (!allValid) {
+                alert('Bitte füllen Sie alle Felder korrekt aus, bevor Sie eine Demo-Bestellung durchführen können.');
+                return;
+            }
             
             // Check terms acceptance
             const acceptTerms = document.getElementById('acceptTerms');
@@ -1534,6 +1625,29 @@ $paypal_mode = $settings->getPayPalMode();
             });
         }
         <?php endif; ?>
+        
+        // Initiale Prüfung beim Laden der Seite
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAllFieldsValid();
+            
+            // Event Listener für alle Eingabefelder hinzufügen
+            const inputFields = ['first_name', 'last_name', 'email', 'address', 'zip', 'city'];
+            inputFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', function() {
+                        // Kleine Verzögerung für bessere Performance
+                        setTimeout(() => {
+                            checkAllFieldsValid();
+                        }, 100);
+                    });
+                    
+                    field.addEventListener('blur', function() {
+                        checkAllFieldsValid();
+                    });
+                }
+            });
+        });
     </script>
 </body>
 </html>
