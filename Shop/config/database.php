@@ -152,11 +152,16 @@ class Database {
     }
     
     private function insertDefaultData() {
-        // Default Admin User (password: admin123)
-        $admin_password = password_hash('admin123', PASSWORD_DEFAULT);
+        // Default Admin User - CHANGE PASSWORD AFTER FIRST LOGIN!
+        $admin_password = password_hash('Ocean2025!SecureAdmin' . bin2hex(random_bytes(8)), PASSWORD_DEFAULT);
         
         $stmt = $this->conn->prepare("INSERT INTO users (name, email, password, is_admin) VALUES (?, ?, ?, ?)");
-        $stmt->execute(['Admin', 'admin@example.com', $admin_password, 1]);
+        $stmt->execute(['Ocean Admin', 'admin@ocean-hosting.com', $admin_password, 1]);
+        
+        // Log the temporary admin password for initial setup
+        error_log('WICHTIG: Temporäres Admin-Passwort erstellt. Bitte sofort ändern nach erstem Login!');
+        error_log('Admin Email: admin@ocean-hosting.com');
+        error_log('Admin Passwort: Ocean2025!SecureAdmin' . substr($admin_password, -16));
         
         // Default Games
         $this->conn->exec("

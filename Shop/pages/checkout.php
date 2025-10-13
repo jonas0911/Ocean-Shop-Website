@@ -137,16 +137,16 @@ $paypal_mode = $settings->getPayPalMode();
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="firstName" class="form-label">Vorname *</label>
-                                    <input type="text" class="form-control" id="firstName" value="<?php echo htmlspecialchars($userAddressData['first_name']); ?>" required>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" autocomplete="given-name" value="<?php echo htmlspecialchars($userAddressData['first_name']); ?>" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="lastName" class="form-label">Nachname *</label>
-                                    <input type="text" class="form-control" id="lastName" value="<?php echo htmlspecialchars($userAddressData['last_name']); ?>" required>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" autocomplete="family-name" value="<?php echo htmlspecialchars($userAddressData['last_name']); ?>" required>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">E-Mail *</label>
-                                <input type="email" class="form-control" id="email" value="<?php echo $user->isLoggedIn() ? htmlspecialchars($currentUser['email']) : ''; ?>" required>
+                                <input type="email" class="form-control" id="email" name="email" autocomplete="email" value="<?php echo $user->isLoggedIn() ? htmlspecialchars($currentUser['email']) : ''; ?>" required>
                                 <div id="email-feedback" class="form-text"></div>
                             </div>
                         </div>
@@ -154,31 +154,120 @@ $paypal_mode = $settings->getPayPalMode();
                         <!-- Billing Address -->
                         <div class="mb-4">
                             <h5><i class="fas fa-map-marker-alt me-2"></i>Rechnungsadresse</h5>
+                            
+                            <!-- Zentrales Adress-Status Info-Feld -->
+                            <div class="alert alert-info d-none py-2 px-3 mb-2" id="address-status-info" style="font-size: 0.85rem; border-width: 1px;">
+                                <div class="d-flex align-items-center">
+                                    <div id="address-status-icon" class="me-2" style="font-size: 0.8rem;">
+                                        <i class="fas fa-info-circle"></i>
+                                    </div>
+                                    <div id="address-status-text" class="flex-grow-1">
+                                        Adressvalidierung läuft...
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="mb-3">
                                 <label for="address" class="form-label">Straße und Hausnummer *</label>
-                                <input type="text" class="form-control" id="address" value="<?php echo htmlspecialchars($userAddressData['address']); ?>" required>
+                                <input type="text" class="form-control" id="address" name="address" autocomplete="street-address" value="<?php echo htmlspecialchars($userAddressData['address']); ?>" required>
                                 <div id="address-feedback" class="form-text"></div>
                             </div>
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label for="zip" class="form-label">PLZ *</label>
-                                    <input type="text" class="form-control" id="zip" value="<?php echo htmlspecialchars($userAddressData['zip']); ?>" required>
+                                    <input type="text" class="form-control" id="zip" name="zip" autocomplete="postal-code" value="<?php echo htmlspecialchars($userAddressData['zip']); ?>" required>
                                     <div id="zip-feedback" class="form-text"></div>
                                 </div>
                                 <div class="col-md-8 mb-3">
                                     <label for="city" class="form-label">Stadt *</label>
-                                    <input type="text" class="form-control" id="city" value="<?php echo htmlspecialchars($userAddressData['city']); ?>" required>
+                                    <input type="text" class="form-control" id="city" name="city" autocomplete="address-level2" value="<?php echo htmlspecialchars($userAddressData['city']); ?>" required>
                                     <div id="city-feedback" class="form-text"></div>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="country" class="form-label">Land *</label>
-                                <select class="form-control" id="country" required>
-                                    <option value="DE" <?php echo ($userAddressData['country'] == 'DE') ? 'selected' : ''; ?>>Deutschland</option>
-                                    <option value="AT" <?php echo ($userAddressData['country'] == 'AT') ? 'selected' : ''; ?>>Österreich</option>
-                                    <option value="CH" <?php echo ($userAddressData['country'] == 'CH') ? 'selected' : ''; ?>>Schweiz</option>
-                                    <option value="US" <?php echo ($userAddressData['country'] == 'US') ? 'selected' : ''; ?>>USA</option>
-                                    <option value="GB" <?php echo ($userAddressData['country'] == 'GB') ? 'selected' : ''; ?>>Großbritannien</option>
+                                <select class="form-control" id="country" name="country" autocomplete="country" required>
+                                    <!-- Europa -->
+                                    <optgroup label="Europa">
+                                        <option value="DE" <?php echo ($userAddressData['country'] == 'DE') ? 'selected' : ''; ?>>🇩🇪 Deutschland</option>
+                                        <option value="AT" <?php echo ($userAddressData['country'] == 'AT') ? 'selected' : ''; ?>>🇦🇹 Österreich</option>
+                                        <option value="CH" <?php echo ($userAddressData['country'] == 'CH') ? 'selected' : ''; ?>>🇨🇭 Schweiz</option>
+                                        <option value="BE" <?php echo ($userAddressData['country'] == 'BE') ? 'selected' : ''; ?>>🇧🇪 Belgien</option>
+                                        <option value="NL" <?php echo ($userAddressData['country'] == 'NL') ? 'selected' : ''; ?>>🇳🇱 Niederlande</option>
+                                        <option value="FR" <?php echo ($userAddressData['country'] == 'FR') ? 'selected' : ''; ?>>🇫🇷 Frankreich</option>
+                                        <option value="IT" <?php echo ($userAddressData['country'] == 'IT') ? 'selected' : ''; ?>>🇮🇹 Italien</option>
+                                        <option value="ES" <?php echo ($userAddressData['country'] == 'ES') ? 'selected' : ''; ?>>🇪🇸 Spanien</option>
+                                        <option value="PT" <?php echo ($userAddressData['country'] == 'PT') ? 'selected' : ''; ?>>🇵🇹 Portugal</option>
+                                        <option value="GB" <?php echo ($userAddressData['country'] == 'GB') ? 'selected' : ''; ?>>🇬🇧 Großbritannien</option>
+                                        <option value="IE" <?php echo ($userAddressData['country'] == 'IE') ? 'selected' : ''; ?>>🇮🇪 Irland</option>
+                                        <option value="DK" <?php echo ($userAddressData['country'] == 'DK') ? 'selected' : ''; ?>>🇩🇰 Dänemark</option>
+                                        <option value="SE" <?php echo ($userAddressData['country'] == 'SE') ? 'selected' : ''; ?>>🇸🇪 Schweden</option>
+                                        <option value="NO" <?php echo ($userAddressData['country'] == 'NO') ? 'selected' : ''; ?>>🇳🇴 Norwegen</option>
+                                        <option value="FI" <?php echo ($userAddressData['country'] == 'FI') ? 'selected' : ''; ?>>🇫🇮 Finnland</option>
+                                        <option value="PL" <?php echo ($userAddressData['country'] == 'PL') ? 'selected' : ''; ?>>🇵🇱 Polen</option>
+                                        <option value="CZ" <?php echo ($userAddressData['country'] == 'CZ') ? 'selected' : ''; ?>>🇨🇿 Tschechien</option>
+                                        <option value="SK" <?php echo ($userAddressData['country'] == 'SK') ? 'selected' : ''; ?>>🇸🇰 Slowakei</option>
+                                        <option value="HU" <?php echo ($userAddressData['country'] == 'HU') ? 'selected' : ''; ?>>🇭🇺 Ungarn</option>
+                                        <option value="SI" <?php echo ($userAddressData['country'] == 'SI') ? 'selected' : ''; ?>>🇸🇮 Slowenien</option>
+                                        <option value="HR" <?php echo ($userAddressData['country'] == 'HR') ? 'selected' : ''; ?>>🇭🇷 Kroatien</option>
+                                        <option value="RO" <?php echo ($userAddressData['country'] == 'RO') ? 'selected' : ''; ?>>🇷🇴 Rumänien</option>
+                                        <option value="BG" <?php echo ($userAddressData['country'] == 'BG') ? 'selected' : ''; ?>>🇧🇬 Bulgarien</option>
+                                        <option value="GR" <?php echo ($userAddressData['country'] == 'GR') ? 'selected' : ''; ?>>🇬🇷 Griechenland</option>
+                                        <option value="LU" <?php echo ($userAddressData['country'] == 'LU') ? 'selected' : ''; ?>>🇱🇺 Luxemburg</option>
+                                    </optgroup>
+                                    
+                                    <!-- Nordamerika -->
+                                    <optgroup label="Nordamerika">
+                                        <option value="US" <?php echo ($userAddressData['country'] == 'US') ? 'selected' : ''; ?>>🇺🇸 USA</option>
+                                        <option value="CA" <?php echo ($userAddressData['country'] == 'CA') ? 'selected' : ''; ?>>🇨🇦 Kanada</option>
+                                        <option value="MX" <?php echo ($userAddressData['country'] == 'MX') ? 'selected' : ''; ?>>🇲🇽 Mexiko</option>
+                                    </optgroup>
+                                    
+                                    <!-- Asien-Pazifik -->
+                                    <optgroup label="Asien-Pazifik">
+                                        <option value="JP" <?php echo ($userAddressData['country'] == 'JP') ? 'selected' : ''; ?>>🇯🇵 Japan</option>
+                                        <option value="KR" <?php echo ($userAddressData['country'] == 'KR') ? 'selected' : ''; ?>>🇰🇷 Südkorea</option>
+                                        <option value="CN" <?php echo ($userAddressData['country'] == 'CN') ? 'selected' : ''; ?>>🇨🇳 China</option>
+                                        <option value="IN" <?php echo ($userAddressData['country'] == 'IN') ? 'selected' : ''; ?>>🇮🇳 Indien</option>
+                                        <option value="SG" <?php echo ($userAddressData['country'] == 'SG') ? 'selected' : ''; ?>>🇸🇬 Singapur</option>
+                                        <option value="AU" <?php echo ($userAddressData['country'] == 'AU') ? 'selected' : ''; ?>>🇦🇺 Australien</option>
+                                        <option value="NZ" <?php echo ($userAddressData['country'] == 'NZ') ? 'selected' : ''; ?>>🇳🇿 Neuseeland</option>
+                                        <option value="TH" <?php echo ($userAddressData['country'] == 'TH') ? 'selected' : ''; ?>>🇹🇭 Thailand</option>
+                                        <option value="MY" <?php echo ($userAddressData['country'] == 'MY') ? 'selected' : ''; ?>>🇲🇾 Malaysia</option>
+                                        <option value="ID" <?php echo ($userAddressData['country'] == 'ID') ? 'selected' : ''; ?>>🇮🇩 Indonesien</option>
+                                        <option value="PH" <?php echo ($userAddressData['country'] == 'PH') ? 'selected' : ''; ?>>🇵🇭 Philippinen</option>
+                                        <option value="VN" <?php echo ($userAddressData['country'] == 'VN') ? 'selected' : ''; ?>>🇻🇳 Vietnam</option>
+                                        <option value="TW" <?php echo ($userAddressData['country'] == 'TW') ? 'selected' : ''; ?>>🇹🇼 Taiwan</option>
+                                        <option value="HK" <?php echo ($userAddressData['country'] == 'HK') ? 'selected' : ''; ?>>🇭🇰 Hongkong</option>
+                                    </optgroup>
+                                    
+                                    <!-- Südamerika -->
+                                    <optgroup label="Südamerika">
+                                        <option value="BR" <?php echo ($userAddressData['country'] == 'BR') ? 'selected' : ''; ?>>🇧🇷 Brasilien</option>
+                                        <option value="AR" <?php echo ($userAddressData['country'] == 'AR') ? 'selected' : ''; ?>>🇦🇷 Argentinien</option>
+                                        <option value="CL" <?php echo ($userAddressData['country'] == 'CL') ? 'selected' : ''; ?>>🇨🇱 Chile</option>
+                                        <option value="CO" <?php echo ($userAddressData['country'] == 'CO') ? 'selected' : ''; ?>>🇨🇴 Kolumbien</option>
+                                        <option value="PE" <?php echo ($userAddressData['country'] == 'PE') ? 'selected' : ''; ?>>🇵🇪 Peru</option>
+                                        <option value="UY" <?php echo ($userAddressData['country'] == 'UY') ? 'selected' : ''; ?>>🇺🇾 Uruguay</option>
+                                    </optgroup>
+                                    
+                                    <!-- Afrika & Naher Osten -->
+                                    <optgroup label="Afrika & Naher Osten">
+                                        <option value="ZA" <?php echo ($userAddressData['country'] == 'ZA') ? 'selected' : ''; ?>>🇿🇦 Südafrika</option>
+                                        <option value="IL" <?php echo ($userAddressData['country'] == 'IL') ? 'selected' : ''; ?>>🇮🇱 Israel</option>
+                                        <option value="AE" <?php echo ($userAddressData['country'] == 'AE') ? 'selected' : ''; ?>>🇦🇪 Vereinigte Arabische Emirate</option>
+                                        <option value="SA" <?php echo ($userAddressData['country'] == 'SA') ? 'selected' : ''; ?>>🇸🇦 Saudi-Arabien</option>
+                                        <option value="TR" <?php echo ($userAddressData['country'] == 'TR') ? 'selected' : ''; ?>>🇹🇷 Türkei</option>
+                                        <option value="EG" <?php echo ($userAddressData['country'] == 'EG') ? 'selected' : ''; ?>>🇪🇬 Ägypten</option>
+                                    </optgroup>
+                                    
+                                    <!-- Sonstige -->
+                                    <optgroup label="Sonstige">
+                                        <option value="RU" <?php echo ($userAddressData['country'] == 'RU') ? 'selected' : ''; ?>>🇷🇺 Russland</option>
+                                        <option value="UA" <?php echo ($userAddressData['country'] == 'UA') ? 'selected' : ''; ?>>🇺🇦 Ukraine</option>
+                                        <option value="BY" <?php echo ($userAddressData['country'] == 'BY') ? 'selected' : ''; ?>>🇧🇾 Belarus</option>
+                                        <option value="OTHER" <?php echo ($userAddressData['country'] == 'OTHER') ? 'selected' : ''; ?>>🌍 Anderes Land</option>
+                                    </optgroup>
                                 </select>
                             </div>
                         </div>
@@ -306,8 +395,19 @@ $paypal_mode = $settings->getPayPalMode();
         const addressRegex = /^[a-zA-ZäöüßÄÖÜ0-9\s\-\.,]+$/;
         
         function updateFieldStatus(fieldId, status, message = '') {
+            const field = document.getElementById(fieldId);
             const statusIcon = document.getElementById(fieldId + '-status');
             const feedback = document.getElementById(fieldId + '-feedback');
+            
+            // Setze CSS-Klassen am Feld
+            if (field) {
+                field.classList.remove('is-valid', 'is-invalid');
+                if (status === 'valid') {
+                    field.classList.add('is-valid');
+                } else if (status === 'invalid') {
+                    field.classList.add('is-invalid');
+                }
+            }
             
             if (statusIcon) {
                 statusIcon.innerHTML = '';
@@ -337,34 +437,42 @@ $paypal_mode = $settings->getPayPalMode();
         
         // Prüfe ob alle Pflichtfelder korrekt validiert sind
         function checkAllFieldsValid() {
-            const requiredFields = ['first_name', 'last_name', 'email', 'address', 'zip', 'city'];
+            const requiredFields = ['firstName', 'lastName', 'email', 'address', 'zip', 'city'];
             const continueBtn = document.getElementById('continueBtn');
             const demoBtn = document.getElementById('demoOrderBtn');
             
             if (!continueBtn) return;
             
             let allValid = true;
+            console.log('=== Checking all fields validity ===');
             
             for (const fieldId of requiredFields) {
                 const field = document.getElementById(fieldId);
                 
                 if (!field) {
+                    console.log('Field not found:', fieldId);
                     allValid = false;
                     break;
                 }
                 
                 // Prüfe ob Feld ausgefüllt ist
                 if (!field.value.trim()) {
+                    console.log('Field empty:', fieldId);
                     allValid = false;
                     break;
                 }
                 
                 // Prüfe ob Feld als valid markiert ist (grüner Rahmen)
                 if (!field.classList.contains('is-valid')) {
+                    console.log('Field not valid:', fieldId, 'Classes:', field.className);
                     allValid = false;
                     break;
+                } else {
+                    console.log('Field OK:', fieldId, 'Value:', field.value.trim().substring(0, 20) + '...');
                 }
             }
+            
+            console.log('All fields valid:', allValid);
             
             // Beide Buttons aktivieren/deaktivieren
             if (allValid) {
@@ -464,6 +572,114 @@ $paypal_mode = $settings->getPayPalMode();
             return true;
         }
         
+        // Zentrale Benachrichtigungsfunktion
+        function showNotification(message, type = 'info') {
+            // Erstelle eine Toast-Benachrichtigung
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto-remove nach 5 Sekunden
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 5000);
+        }
+
+        // Zentrale Adress-Status-Verwaltung
+        function showAddressStatus(type, message, details = null) {
+            const statusInfo = document.getElementById('address-status-info');
+            const statusIcon = document.getElementById('address-status-icon');
+            const statusText = document.getElementById('address-status-text');
+            
+            if (!statusInfo || !statusIcon || !statusText) return;
+            
+            // Zeige das Status-Feld
+            statusInfo.classList.remove('d-none', 'alert-info', 'alert-warning', 'alert-danger', 'alert-success');
+            
+            switch(type) {
+                case 'loading':
+                    statusInfo.classList.add('alert-info');
+                    statusIcon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    break;
+                case 'analyzing':
+                    statusInfo.classList.add('alert-warning');
+                    statusIcon.innerHTML = '<i class="fas fa-search fa-spin"></i>';
+                    break;
+                case 'error':
+                    statusInfo.classList.add('alert-danger');
+                    statusIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                    break;
+                case 'partial':
+                    statusInfo.classList.add('alert-warning');
+                    statusIcon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+                    break;
+                case 'success':
+                    statusInfo.classList.add('alert-success');
+                    statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                    break;
+                default:
+                    statusInfo.classList.add('alert-info');
+                    statusIcon.innerHTML = '<i class="fas fa-info-circle"></i>';
+            }
+            
+            statusText.innerHTML = message;
+        }
+        
+        function hideAddressStatus() {
+            const statusInfo = document.getElementById('address-status-info');
+            if (statusInfo) {
+                statusInfo.classList.add('d-none');
+            }
+        }
+        
+        // Zeige Loading-Indikatoren während Adressvalidierung
+        function showAddressValidationLoading() {
+            const addressField = document.getElementById('address');
+            const zipField = document.getElementById('zip');
+            const cityField = document.getElementById('city');
+            
+            // Entferne alle individuellen Feedback-Nachrichten
+            clearIndividualFeedback();
+            
+            // Entferne Validierungsklassen
+            [addressField, zipField, cityField].forEach(field => {
+                if (field) {
+                    field.classList.remove('is-valid', 'is-invalid');
+                }
+            });
+            
+            // Zeige zentrale Loading-Nachricht
+            showAddressStatus('loading', 'Validiere Adresse, PLZ und Stadt...');
+        }
+        
+        // Entferne alle individuellen Feedback-Nachrichten
+        function clearIndividualFeedback() {
+            const addressFeedback = document.getElementById('address-feedback');
+            const zipFeedback = document.getElementById('zip-feedback');
+            const cityFeedback = document.getElementById('city-feedback');
+            
+            [addressFeedback, zipFeedback, cityFeedback].forEach(feedback => {
+                if (feedback) {
+                    feedback.innerHTML = '';
+                    feedback.className = 'form-text';
+                }
+            });
+        }
+        
+        // Entferne Loading-Indikatoren
+        function hideAddressValidationLoading() {
+            clearIndividualFeedback();
+            hideAddressStatus();
+        }
+        
         // Intelligente Adressvalidierung - erkennt automatisch welche Felder ausgefüllt sind
         let addressValidationTimeout;
         let addressValidationRunning = false;
@@ -492,6 +708,9 @@ $paypal_mode = $settings->getPayPalMode();
             addressValidationRunning = true;
             console.log('Starting address validation...');
             
+            // Zeige Loading-Indikatoren für alle Adressfelder
+            showAddressValidationLoading();
+            
             const addressField = document.getElementById('address');
             const zipField = document.getElementById('zip');
             const cityField = document.getElementById('city');
@@ -504,48 +723,8 @@ $paypal_mode = $settings->getPayPalMode();
             const zip = zipField ? zipField.value.trim() : '';
             const city = cityField ? cityField.value.trim() : '';
             
-            // Auto-Korrektur für zusammengeschriebene Straßennamen
-            if (address && address.length > 0) {
-                const originalAddress = address;
-                
-                // Erkenne zusammengeschriebene Straßennamen und korrigiere sie
-                address = address
-                    // "...straße" -> "... Straße"
-                    .replace(/([a-züäöß]+)(straße)(\s*\d+[a-zA-Z]?)/gi, '$1 Straße$3')
-                    // "...gasse" -> "... Gasse" 
-                    .replace(/([a-züäöß]+)(gasse)(\s*\d+[a-zA-Z]?)/gi, '$1 Gasse$3')
-                    // "...weg" -> "... Weg"
-                    .replace(/([a-züäöß]+)(weg)(\s*\d+[a-zA-Z]?)/gi, '$1 Weg$3')
-                    // "...platz" -> "... Platz"
-                    .replace(/([a-züäöß]+)(platz)(\s*\d+[a-zA-Z]?)/gi, '$1 Platz$3')
-                    // "...allee" -> "... Allee"
-                    .replace(/([a-züäöß]+)(allee)(\s*\d+[a-zA-Z]?)/gi, '$1 Allee$3')
-                    // "...ring" -> "... Ring"
-                    .replace(/([a-züäöß]+)(ring)(\s*\d+[a-zA-Z]?)/gi, '$1 Ring$3')
-                    // "...damm" -> "... Damm"
-                    .replace(/([a-züäöß]+)(damm)(\s*\d+[a-zA-Z]?)/gi, '$1 Damm$3');
-                
-                // Wenn Korrektur vorgenommen wurde, zeige es dem User
-                if (address !== originalAddress && addressField) {
-                    console.log('Auto-corrected address:', originalAddress, '->', address);
-                    addressField.value = address; // Aktualisiere das Eingabefeld
-                    
-                    // Kurzes visuelles Feedback
-                    if (addressFeedback) {
-                        const oldClass = addressFeedback.className;
-                        const oldText = addressFeedback.textContent;
-                        
-                        addressFeedback.textContent = `Auto-korrigiert: ${address}`;
-                        addressFeedback.className = 'form-text text-info';
-                        
-                        // Nach 2 Sekunden zurück zu normal
-                        setTimeout(() => {
-                            addressFeedback.textContent = oldText;
-                            addressFeedback.className = oldClass;
-                        }, 2000);
-                    }
-                }
-            }
+            // Speichere originale Adresse für spätere API-basierte Korrektur
+            const originalAddress = address;
             
             console.log('Smart validation - Address:', address, 'ZIP:', zip, 'City:', city);
             
@@ -618,85 +797,47 @@ $paypal_mode = $settings->getPayPalMode();
                     let cityValid = false;
                     let addressValid = false;
                     
-                    // PLZ Validierung
+                    // PLZ Validierung - Großzügige Einzelvalidierung
                     if (zipResult && zipResult.length > 0) {
                         console.log('ZIP validation result:', zipResult);
                         zipValid = true;
                     } else {
-                        console.log('ZIP not found');
-                        if (zipField && zipFeedback) {
-                            zipField.classList.remove('is-valid');
-                            zipField.classList.add('is-invalid');
-                            zipFeedback.textContent = 'PLZ + Adresse nicht gefunden';
-                            zipFeedback.className = 'form-text text-danger';
-                        }
+                        console.log('ZIP not found individually - will verify in combination');
+                        // Akzeptiere erstmal als möglicherweise gültig
+                        zipValid = true;
                     }
                     
-                    // Stadt Validierung
+                    // Stadt Validierung - Großzügige Einzelvalidierung
                     if (cityResult && cityResult.length > 0) {
                         console.log('City validation result:', cityResult);
-                        const expectedCity = city.toLowerCase();
-                        
-                        for (let item of cityResult) {
-                            const itemType = item.type || '';
-                            const itemClass = item.class || '';
-                            
-                            if ((itemClass === 'place' && ['city', 'town', 'village', 'suburb'].includes(itemType)) ||
-                                (itemClass === 'boundary' && itemType === 'administrative')) {
-                                const foundName = (item.name || '').toLowerCase();
-                                if (foundName === expectedCity) {
-                                    cityValid = true;
-                                    console.log('Valid city found:', item.display_name);
-                                    break;
-                                }
-                            }
-                        }
+                        cityValid = true;
+                        console.log('City accepted (individual validation)');
+                    } else {
+                        console.log('City not found individually - will verify in combination');
+                        // Akzeptiere erstmal als möglicherweise gültig
+                        cityValid = true;
                     }
                     
-                    if (!cityValid) {
-                        console.log('City not valid');
-                        if (cityField && cityFeedback) {
-                            cityField.classList.remove('is-valid');
-                            cityField.classList.add('is-invalid');
-                            cityFeedback.textContent = 'Stadt nicht gefunden';
-                            cityFeedback.className = 'form-text text-danger';
-                        }
-                    }
-                    
-                    // Adresse Validierung (einfacher Check ob örtlich existiert)
+                    // Adresse Validierung - Großzügige Einzelvalidierung (Kombinationsvalidierung ist maßgeblich)
                     if (addressResult && addressResult.length > 0) {
                         console.log('Address validation result:', addressResult);
-                        // Prüfe ob Adresse in den Ergebnissen vorkommt
-                        const expectedAddress = address.toLowerCase();
-                        for (let item of addressResult) {
-                            if (item.display_name && item.display_name.toLowerCase().includes(expectedAddress.split(' ')[0].toLowerCase())) {
-                                addressValid = true;
-                                console.log('Address found in result:', item.display_name);
-                                break;
-                            }
-                        }
-                    }
-                    
-                    if (!addressValid) {
-                        console.log('Address not found');
-                        if (addressField && addressFeedback) {
-                            addressField.classList.remove('is-valid');
-                            addressField.classList.add('is-invalid');
-                            addressFeedback.textContent = 'Adresse nicht gefunden';
-                            addressFeedback.className = 'form-text text-danger';
-                        }
-                    }
-                    
-                    // Nur wenn alle drei einzeln gültig sind, teste die Kombination
-                    if (zipValid && cityValid && addressValid) {
-                        console.log('All three fields valid individually - now testing combination');
-                        const combinationQueries = [
-                            { query: `street=${encodeURIComponent(address)}&postalcode=${zip}&city=${encodeURIComponent(city)}&country=DE&format=json`, fields: ['address', 'zip', 'city'], isSpecialQuery: true }
-                        ];
-                        executeQueries(combinationQueries);
+                        
+                        // Wenn API überhaupt Ergebnisse zurückgibt, akzeptiere als möglicherweise gültig
+                        // Die finale Validierung erfolgt in der Kombinationsabfrage
+                        addressValid = true;
+                        console.log('Address accepted (individual validation) - will be verified in combination check');
                     } else {
-                        console.log('Individual validation failed - not testing combination');
+                        console.log('No address results from API - possibly invalid street name');
+                        // Trotzdem erstmal als gültig markieren und Kombinationsvalidierung abwarten
+                        addressValid = true;
                     }
+                    
+                    // Teste IMMER die Kombination - API ist oft besser bei Kombinationsabfragen
+                    console.log('Testing combination with results - ZIP:', zipValid, 'City:', cityValid, 'Address:', addressValid);
+                    const combinationQueries = [
+                        { query: `street=${encodeURIComponent(address)}&postalcode=${zip}&city=${encodeURIComponent(city)}&country=DE&format=json`, fields: ['address', 'zip', 'city'], isSpecialQuery: true }
+                    ];
+                    executeQueries(combinationQueries);
                     
                     // Reset validation flag
                     addressValidationRunning = false;
@@ -1063,9 +1204,56 @@ $paypal_mode = $settings->getPayPalMode();
                             const expectedAddress = addressField ? addressField.value.trim().toLowerCase() : '';
                             const foundAddress = (data.display_name || '').toLowerCase();
                             console.log('Address check - Expected:', expectedAddress, 'Found in:', foundAddress);
-                            if (expectedAddress && !foundAddress.includes(expectedAddress.split(' ')[0])) {
-                                console.log('Address mismatch - rejecting result');
-                                isValidMatch = false;
+                            
+                            // Intelligente Adressvalidierung - prüfe verschiedene Varianten
+                            if (expectedAddress) {
+                                const expectedStreet = expectedAddress.replace(/\s*\d+.*$/, '').trim(); // Ohne Hausnummer
+                                const expectedWords = expectedStreet.split(/\s+/);
+                                
+                                // Prüfe ob die Adresse in irgendeiner Form im Ergebnis vorkommt
+                                let addressFound = false;
+                                
+                                // 1. Exakte Übereinstimmung
+                                if (foundAddress.includes(expectedStreet)) {
+                                    addressFound = true;
+                                    console.log('Address found: exact match');
+                                }
+                                // 2. Zusammengeschrieben vs. getrennt (hückeswagenerstraße vs hückeswagener straße)
+                                else if (expectedWords.length > 1) {
+                                    // User hat getrennt eingegeben, API hat zusammengeschrieben
+                                    const joinedExpected = expectedWords.join('');
+                                    if (foundAddress.includes(joinedExpected)) {
+                                        addressFound = true;
+                                        console.log('Address found: user separated, API joined');
+                                    }
+                                } else if (expectedWords.length === 1 && expectedStreet.length > 8) {
+                                    // User hat zusammengeschrieben, API hat getrennt - teste verschiedene Trennungen
+                                    const streetTypes = ['straße', 'gasse', 'weg', 'platz', 'allee', 'ring', 'damm'];
+                                    for (const type of streetTypes) {
+                                        if (expectedStreet.endsWith(type.toLowerCase())) {
+                                            const prefix = expectedStreet.substring(0, expectedStreet.length - type.length);
+                                            const separatedVersion = prefix + ' ' + type;
+                                            if (foundAddress.includes(separatedVersion)) {
+                                                addressFound = true;
+                                                console.log('Address found: user joined, API separated (' + separatedVersion + ')');
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                // 3. Fallback: Prüfe ob der erste Teil der Adresse vorkommt
+                                if (!addressFound && expectedWords.length > 0) {
+                                    const firstWord = expectedWords[0];
+                                    if (firstWord.length >= 4 && foundAddress.includes(firstWord)) {
+                                        addressFound = true;
+                                        console.log('Address found: first word match (' + firstWord + ')');
+                                    }
+                                }
+                                
+                                if (!addressFound) {
+                                    console.log('Address mismatch - rejecting result');
+                                    isValidMatch = false;
+                                }
                             }
                         }
                         
@@ -1083,83 +1271,160 @@ $paypal_mode = $settings->getPayPalMode();
                 if (foundValid && bestResult) {
                     console.log('Found valid address:', bestResult.data[0].display_name);
                     
-                    // Setze alle beteiligten Felder auf valid
-                    bestResult.fields.forEach(fieldName => {
-                        const field = document.getElementById(fieldName);
-                        const feedback = document.getElementById(fieldName + '-feedback');
+                    // API-basierte Auto-Korrektur der Adresse
+                    const apiResult = bestResult.data[0];
+                    const currentAddress = addressField ? addressField.value.trim() : '';
+                    
+                    // Extrahiere Straßenname aus API-Antwort
+                    let apiStreetName = '';
+                    if (apiResult.address && apiResult.address.road) {
+                        apiStreetName = apiResult.address.road;
+                    } else if (apiResult.display_name) {
+                        // Fallback: Extrahiere ersten Teil der display_name
+                        const parts = apiResult.display_name.split(',');
+                        if (parts.length > 1) {
+                            // Entferne Hausnummer aus dem ersten Teil und nimm zweiten Teil
+                            apiStreetName = parts[1].trim().replace(/^\d+\s*,?\s*/, '');
+                        }
+                    }
+                    
+                    // Prüfe ob Korrektur nötig ist (API-Straße vs eingegebene Straße)
+                    if (apiStreetName && currentAddress && bestResult.fields.includes('address')) {
+                        const userStreetPart = currentAddress.replace(/\s*\d+.*$/, '').trim().toLowerCase();
+                        const apiStreetLower = apiStreetName.toLowerCase();
                         
-                        if (field && feedback) {
-                            field.classList.remove('is-invalid');
-                            field.classList.add('is-valid');
+                        console.log('Comparing streets - User:', userStreetPart, 'API:', apiStreetLower);
+                        
+                        // Prüfe ob Korrektur nötig ist - verschiedene Ansätze
+                        let needsCorrection = false;
+                        
+                        if (apiStreetLower !== userStreetPart) {
+                            // 1. Direkte Ähnlichkeit (contains)
+                            if (apiStreetLower.includes(userStreetPart) || userStreetPart.includes(apiStreetLower)) {
+                                needsCorrection = true;
+                                console.log('Correction needed: direct similarity');
+                            }
+                            // 2. Zusammengeschrieben vs. getrennt (hückeswagenerstraße vs hückeswagener straße)
+                            else {
+                                const userWords = userStreetPart.split(/\s+/);
+                                const apiWords = apiStreetLower.split(/\s+/);
+                                
+                                // User zusammengeschrieben, API getrennt
+                                if (userWords.length === 1 && apiWords.length > 1) {
+                                    const joinedApi = apiWords.join('');
+                                    if (userWords[0] === joinedApi) {
+                                        needsCorrection = true;
+                                        console.log('Correction needed: user joined, API separated');
+                                    }
+                                }
+                                // User getrennt, API zusammengeschrieben  
+                                else if (userWords.length > 1 && apiWords.length === 1) {
+                                    const joinedUser = userWords.join('');
+                                    if (joinedUser === apiWords[0]) {
+                                        needsCorrection = true;
+                                        console.log('Correction needed: user separated, API joined');
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if (needsCorrection) {
                             
-                            let message = '';
-                            switch(fieldName) {
-                                case 'address': message = 'Adresse ist korrekt'; break;
-                                case 'zip': message = 'Postleitzahl ist korrekt'; break;
-                                case 'city': message = 'Stadt ist korrekt'; break;
+                            // Extrahiere Hausnummer aus API-Ergebnis (bevorzugt) oder User-Eingabe (Fallback)
+                            let houseNumber = '';
+                            
+                            // 1. Versuche Hausnummer aus API display_name zu extrahieren
+                            if (apiResult.display_name) {
+                                const displayParts = apiResult.display_name.split(',');
+                                if (displayParts.length > 0) {
+                                    const firstPart = displayParts[0].trim();
+                                    const apiHouseMatch = firstPart.match(/^(\d+[a-zA-Z]?)/);
+                                    if (apiHouseMatch) {
+                                        houseNumber = apiHouseMatch[1];
+                                        console.log('Using house number from API:', houseNumber);
+                                    }
+                                }
                             }
                             
-                            feedback.textContent = message;
-                            feedback.className = 'form-text text-success';
+                            // 2. Fallback: Hausnummer aus User-Eingabe wenn API keine liefert
+                            if (!houseNumber) {
+                                const userHouseMatch = currentAddress.match(/\d+[a-zA-Z]?.*$/);
+                                houseNumber = userHouseMatch ? userHouseMatch[0] : '';
+                                console.log('Using house number from user input:', houseNumber);
+                            }
+                            
+                            const correctedAddress = apiStreetName + (houseNumber ? ' ' + houseNumber : '');
+                            
+                            console.log('API-based correction:', currentAddress, '->', correctedAddress);
+                            
+                            // Aktualisiere das Adressfeld
+                            if (addressField) {
+                                addressField.value = correctedAddress;
+                                console.log('Address field updated to:', correctedAddress);
+                                
+                                // Sofort als valid markieren
+                                addressField.classList.remove('is-invalid');
+                                addressField.classList.add('is-valid');
+                                
+                                // Kurzes visuelles Feedback
+                                const addressFeedback = document.getElementById('address-feedback');
+                                if (addressFeedback) {
+                                    addressFeedback.textContent = `Auto-korrigiert: ${correctedAddress}`;
+                                    addressFeedback.className = 'form-text text-info';
+                                    
+                                    // Nach 3 Sekunden zurück zu Erfolg
+                                    setTimeout(() => {
+                                        addressFeedback.textContent = 'Adresse ist korrekt';
+                                        addressFeedback.className = 'form-text text-success';
+                                    }, 3000);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Setze alle beteiligten Felder auf valid und zeige Erfolgsmeldung
+                    bestResult.fields.forEach(fieldName => {
+                        const field = document.getElementById(fieldName);
+                        if (field) {
+                            console.log('Setting field as valid:', fieldName);
+                            field.classList.remove('is-invalid');
+                            field.classList.add('is-valid');
                         }
                     });
                     
+                    // Zentrale Erfolgsmeldung
+                    let successMessage = 'Adressvalidierung erfolgreich! ';
+                    if (bestResult.fields.includes('address')) successMessage += 'Adresse ';
+                    if (bestResult.fields.includes('zip')) successMessage += 'PLZ ';
+                    if (bestResult.fields.includes('city')) successMessage += 'Stadt ';
+                    successMessage += 'sind korrekt.';
+                    
+                    showAddressStatus('success', successMessage);
+                    
+                    console.log('Calling checkAllFieldsValid after successful validation');
                     // Prüfe ob alle Felder jetzt valid sind
-                    checkAllFieldsValid();
-                    });
+                    setTimeout(() => {
+                        checkAllFieldsValid();
+                    }, 100); // Kurze Verzögerung um sicherzustellen dass DOM-Updates abgeschlossen sind
                     
                 } else {
-                    console.log('No valid address found');
+                    console.log('No valid address found - analyzing which fields are problematic');
                     
-                    // Setze alle ausgefüllten Felder auf invalid mit passender Fehlermeldung
-                    const address = addressField ? addressField.value.trim() : '';
-                    const zip = zipField ? zipField.value.trim() : '';
-                    const city = cityField ? cityField.value.trim() : '';
+                    // Entferne Loading-Indikatoren vor Fehleranalyse
+                    hideAddressValidationLoading();
                     
-                    const filledFields = [];
-                    if (addressField && address) filledFields.push('address');
-                    if (zipField && zip) filledFields.push('zip');
-                    if (cityField && city) filledFields.push('city');
-                    
-                    // Passende Fehlermeldung je nach Kombination
-                    let zipMessage = 'Postleitzahl nicht gefunden';
-                    let cityMessage = 'Stadt nicht gefunden';
-                    let addressMessage = 'Adresse nicht gefunden';
-                    
-                    if (filledFields.includes('zip') && filledFields.includes('city')) {
-                        zipMessage = 'PLZ + Adresse + Stadt passen nicht';
-                        cityMessage = 'Stadt + PLZ + Adresse passen nicht';
-                    }
-                    if (filledFields.includes('address') && filledFields.includes('zip')) {
-                        addressMessage = 'Adresse + PLZ passen nicht';
-                        zipMessage = filledFields.includes('city') ? zipMessage : 'PLZ + Adresse passen nicht';
-                    }
-                    if (filledFields.includes('address') && filledFields.includes('city')) {
-                        addressMessage = filledFields.includes('zip') ? addressMessage : 'Adresse + Stadt passen nicht';
-                        cityMessage = filledFields.includes('zip') ? cityMessage : 'Stadt + Adresse passen nicht';
-                    }
-                    
-                    [
-                        { field: addressField, feedback: addressFeedback, name: 'address', message: addressMessage },
-                        { field: zipField, feedback: zipFeedback, name: 'zip', message: zipMessage },
-                        { field: cityField, feedback: cityFeedback, name: 'city', message: cityMessage }
-                    ].forEach(item => {
-                        if (item.field && item.field.value.trim() && item.feedback) {
-                            item.field.classList.remove('is-valid');
-                            item.field.classList.add('is-invalid');
-                            item.feedback.textContent = item.message;
-                            item.feedback.className = 'form-text text-danger';
-                        }
-                    });
+                    // Intelligente Fehleranalyse: Teste einzelne Kombinationen um herauszufinden welches Feld falsch ist
+                    analyzeAddressErrors();
                 }
-                
-                validateCompleteAddress();
                 
                 // Reset validation flag at the end
                 addressValidationRunning = false;
             })
             .catch(error => {
                 console.error('Smart address validation failed:', error);
+                
+                // Entferne Loading-Indikatoren bei Fehler
+                hideAddressValidationLoading();
                 
                 // Reset validation flag on error
                 addressValidationRunning = false;
@@ -1231,6 +1496,202 @@ $paypal_mode = $settings->getPayPalMode();
                     console.error('Complete address validation failed');
                 });
             }, 1000); // Wait 1 second after last field change
+        }
+        
+        // Intelligente Fehleranalyse für Adressvalidierung
+        async function analyzeAddressErrors() {
+            const addressField = document.getElementById('address');
+            const zipField = document.getElementById('zip');
+            const cityField = document.getElementById('city');
+            
+            const addressFeedback = document.getElementById('address-feedback');
+            const zipFeedback = document.getElementById('zip-feedback');
+            const cityFeedback = document.getElementById('city-feedback');
+            
+            const address = addressField ? addressField.value.trim() : '';
+            const zip = zipField ? zipField.value.trim() : '';
+            const city = cityField ? cityField.value.trim() : '';
+            
+            console.log('Analyzing address errors for:', { address, zip, city });
+            
+            // Zeige zentrale Analyse-Nachricht
+            showAddressStatus('analyzing', 'Analysiere Adressprobleme...');
+            
+            // Teste verschiedene Kombinationen um herauszufinden welches Feld falsch ist
+            const tests = [];
+            
+            // 1. Teste PLZ + Stadt (ohne Adresse) - um zu sehen ob diese Kombination stimmt
+            if (zip && city) {
+                tests.push({
+                    name: 'zip_city',
+                    url: `https://nominatim.openstreetmap.org/search?postalcode=${zip}&city=${encodeURIComponent(city)}&country=DE&format=json&limit=3`,
+                    fields: ['zip', 'city']
+                });
+            }
+            
+            // 2. Teste nur PLZ - um zu sehen ob PLZ überhaupt existiert
+            if (zip) {
+                tests.push({
+                    name: 'zip_only',
+                    url: `https://nominatim.openstreetmap.org/search?postalcode=${zip}&country=DE&format=json&limit=3`,
+                    fields: ['zip']
+                });
+            }
+            
+            // 3. Teste nur Stadt - um zu sehen ob Stadt existiert
+            if (city) {
+                tests.push({
+                    name: 'city_only',
+                    url: `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(city)}&country=DE&format=json&limit=3`,
+                    fields: ['city']
+                });
+            }
+            
+            // 4. Teste Adresse + Stadt (ohne PLZ) - um die korrekte PLZ herauszufinden
+            if (address && city) {
+                tests.push({
+                    name: 'address_city',
+                    url: `https://nominatim.openstreetmap.org/search?street=${encodeURIComponent(address)}&city=${encodeURIComponent(city)}&country=DE&format=json&limit=3`,
+                    fields: ['address', 'city']
+                });
+            }
+            
+            const results = {};
+            
+            // Führe Tests sequenziell aus
+            for (const test of tests) {
+                try {
+                    console.log('Testing:', test.name, 'URL:', test.url);
+                    const response = await fetch(test.url);
+                    const data = response.ok ? await response.json() : [];
+                    results[test.name] = data.length > 0;
+                    console.log('Test result:', test.name, results[test.name], 'Results count:', data.length);
+                    
+                    // Pause zwischen Requests
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                } catch (error) {
+                    console.error('Test failed:', test.name, error);
+                    results[test.name] = false;
+                }
+            }
+            
+            // Analysiere Ergebnisse und setze spezifische Fehlermeldungen
+            let addressValid = true; // Adresse kann nicht einzeln getestet werden, nehme an sie ist OK
+            let zipValid = results.zip_only || false;
+            let cityValid = results.city_only || false;
+            let zipCityValid = results.zip_city || false;
+            let addressCityValid = results.address_city || false; // Neue Variable für Adresse+Stadt Test
+            
+            console.log('Analysis results:', { addressValid, zipValid, cityValid, zipCityValid, addressCityValid });
+            
+            // Spezifische Fehlermeldungen basierend auf Tests - KONSISTENTE LOGIK
+            if (address && zip && city) {
+                // Alle drei Felder vorhanden - analysiere schrittweise
+                if (!zipValid && !cityValid) {
+                    // Sowohl PLZ als auch Stadt existieren nicht
+                    zipField.classList.add('is-invalid');
+                    cityField.classList.add('is-invalid');
+                    addressField.classList.add('is-invalid');
+                    showAddressStatus('error', 'PLZ und Stadt existieren nicht. Bitte überprüfen Sie Ihre Eingaben.');
+                } else if (!zipValid && cityValid && !zipCityValid) {
+                    // PLZ existiert nicht, aber Stadt ist OK - Stadt ist korrekt, PLZ falsch
+                    zipField.classList.add('is-invalid');
+                    zipField.classList.remove('is-valid');
+                    cityField.classList.add('is-valid');
+                    cityField.classList.remove('is-invalid');
+                    if (addressCityValid) {
+                        addressField.classList.add('is-valid');
+                        addressField.classList.remove('is-invalid');
+                        showAddressStatus('error', 'Stadt und Adresse sind korrekt, aber PLZ existiert nicht oder passt nicht dazu.');
+                    } else {
+                        addressField.classList.add('is-invalid');
+                        addressField.classList.remove('is-valid');
+                        showAddressStatus('error', 'Stadt ist korrekt, aber PLZ existiert nicht.');
+                    }
+                } else if (zipValid && !cityValid && !zipCityValid) {
+                    // PLZ existiert, aber Stadt nicht - PLZ ist korrekt, Stadt falsch
+                    zipField.classList.add('is-valid');
+                    zipField.classList.remove('is-invalid');
+                    cityField.classList.add('is-invalid');
+                    cityField.classList.remove('is-valid');
+                    addressField.classList.add('is-invalid');
+                    addressField.classList.remove('is-valid');
+                    showAddressStatus('error', 'PLZ ist korrekt, aber Stadt existiert nicht oder ist falsch geschrieben.');
+                } else if (zipValid && cityValid && !zipCityValid) {
+                    // Beide existieren einzeln, aber passen nicht zusammen
+                    zipField.classList.add('is-invalid');
+                    cityField.classList.add('is-invalid');
+                    addressField.classList.add('is-invalid');
+                    showAddressStatus('error', 'PLZ und Stadt existieren beide, passen aber nicht zusammen.');
+                } else {
+                    // PLZ und Stadt sind beide einzeln OK und passen zusammen
+                    // Prüfe ob Adresse+Stadt-Kombination funktioniert (andere PLZ?)
+                    if (addressCityValid) {
+                        // Adresse + Stadt passen zusammen, aber nicht mit dieser PLZ
+                        zipField.classList.add('is-invalid');
+                        addressField.classList.add('is-valid');
+                        cityField.classList.add('is-valid');
+                        showAddressStatus('partial', 'PLZ ist falsch für diese Adresse und Stadt. Adresse und Stadt sind korrekt.');
+                    } else {
+                        // PLZ und Stadt passen zusammen, aber Adresse nicht
+                        zipField.classList.add('is-valid');
+                        cityField.classList.add('is-valid');
+                        addressField.classList.add('is-invalid');  
+                        showAddressStatus('partial', 'Straße existiert nicht in ' + city + ' (PLZ ' + zip + '). PLZ und Stadt sind korrekt.');
+                    }
+                }
+            } else if (address && zip) {
+                // Adresse + PLZ (ohne Stadt) - KONSISTENTE LOGIK
+                if (!zipValid) {
+                    setFieldError(zipField, zipFeedback, 'Postleitzahl existiert nicht');
+                    setFieldError(addressField, addressFeedback, 'Ungültige PLZ - Adresse kann nicht geprüft werden');
+                } else {
+                    setFieldValid(zipField, zipFeedback, 'Postleitzahl ist korrekt');
+                    setFieldError(addressField, addressFeedback, 'Straße existiert nicht für PLZ ' + zip);
+                }
+            } else if (zip && city) {
+                // PLZ + Stadt (ohne Adresse) - KONSISTENTE LOGIK
+                if (!zipValid && !cityValid) {
+                    setFieldError(zipField, zipFeedback, 'Postleitzahl existiert nicht');
+                    setFieldError(cityField, cityFeedback, 'Stadt existiert nicht');
+                } else if (!zipValid && cityValid) {
+                    setFieldError(zipField, zipFeedback, 'Postleitzahl existiert nicht');
+                    setFieldError(cityField, cityFeedback, 'Stadt existiert, aber PLZ ist ungültig');
+                } else if (zipValid && !cityValid) {
+                    setFieldError(zipField, zipFeedback, 'PLZ existiert, aber Stadt ist ungültig');
+                    setFieldError(cityField, cityFeedback, 'Stadt existiert nicht oder falsch geschrieben');
+                } else if (zipValid && cityValid && !zipCityValid) {
+                    setFieldError(zipField, zipFeedback, 'PLZ gehört nicht zu dieser Stadt');
+                    setFieldError(cityField, cityFeedback, 'Stadt gehört nicht zu dieser PLZ');
+                } else {
+                    setFieldValid(zipField, zipFeedback, 'Postleitzahl ist korrekt');
+                    setFieldValid(cityField, cityFeedback, 'Stadt ist korrekt');
+                }
+            }
+            
+            // Reset validation flag
+            addressValidationRunning = false;
+            
+            // Update button states
+            checkAllFieldsValid();
+        }
+        
+        function setFieldError(field, feedback, message) {
+            if (field && feedback) {
+                field.classList.remove('is-valid');
+                field.classList.add('is-invalid');
+                feedback.textContent = message;
+                feedback.className = 'form-text text-danger';
+            }
+        }
+        
+        function setFieldValid(field, feedback, message) {
+            if (field && feedback) {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+                feedback.textContent = message;
+                feedback.className = 'form-text text-success';
+            }
         }
         
         function validateZip(value) {
@@ -1342,6 +1803,47 @@ $paypal_mode = $settings->getPayPalMode();
                 }
             });
             
+            // Handle country dropdown change
+            const countryField = document.getElementById('country');
+            if (countryField) {
+                countryField.addEventListener('change', function() {
+                    console.log('Country changed to:', this.value);
+                    
+                    // Reset all address field validations
+                    const addressField = document.getElementById('address');
+                    const zipField = document.getElementById('zip');
+                    const cityField = document.getElementById('city');
+                    
+                    if (addressField) {
+                        addressField.classList.remove('is-valid', 'is-invalid');
+                    }
+                    if (zipField) {
+                        zipField.classList.remove('is-valid', 'is-invalid');
+                    }
+                    if (cityField) {
+                        cityField.classList.remove('is-valid', 'is-invalid');
+                    }
+                    
+                    // Clear feedback messages
+                    const addressFeedback = document.getElementById('address-feedback');
+                    const zipFeedback = document.getElementById('zip-feedback');
+                    const cityFeedback = document.getElementById('city-feedback');
+                    
+                    if (addressFeedback) addressFeedback.textContent = '';
+                    if (zipFeedback) zipFeedback.textContent = '';
+                    if (cityFeedback) cityFeedback.textContent = '';
+                    
+                    // Trigger re-validation if address fields have content
+                    if (addressField && addressField.value.trim()) {
+                        console.log('Re-validating address after country change');
+                        validateSmartAddress();
+                    }
+                    
+                    // Update button states
+                    checkAllFieldsValid();
+                });
+            }
+
             // Handle checkbox
             const acceptTerms = document.getElementById('acceptTerms');
             if (acceptTerms) {
@@ -1351,6 +1853,39 @@ $paypal_mode = $settings->getPayPalMode();
                     }
                 });
             }
+
+            // Validiere bereits vorausgefüllte Felder beim Laden der Seite
+            console.log('Validating pre-filled fields on page load...');
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field && field.value.trim()) {
+                    console.log('Pre-filled field found:', fieldId, 'Value:', field.value.trim().substring(0, 20) + '...');
+                    
+                    // Validiere das vorausgefüllte Feld
+                    switch(fieldId) {
+                        case 'firstName':
+                        case 'lastName':
+                            validateName(fieldId, field.value.trim());
+                            break;
+                        case 'email':
+                            validateEmail(field.value.trim());
+                            break;
+                        case 'address':
+                            if (field.value.trim()) {
+                                const zip = document.getElementById('zip').value;
+                                const city = document.getElementById('city').value;
+                                validateAddress(field.value.trim(), zip, city);
+                            }
+                            break;
+                        case 'zip':
+                            validateZip(field.value.trim());
+                            break;
+                        case 'city':
+                            validateCity(field.value.trim());
+                            break;
+                    }
+                }
+            });
         });
 
         function validateAndShowPayPal() {
@@ -1492,7 +2027,7 @@ $paypal_mode = $settings->getPayPalMode();
         // Demo Order Processing (for testing without PayPal)
         function processDemoOrder() {
             // Prüfe erst ob alle Felder valid sind (gleiche Logik wie für Hauptbutton)
-            const requiredFields = ['first_name', 'last_name', 'email', 'address', 'zip', 'city'];
+            const requiredFields = ['firstName', 'lastName', 'email', 'address', 'zip', 'city'];
             const demoBtn = document.getElementById('demoOrderBtn');
             
             let allValid = true;
@@ -1527,12 +2062,11 @@ $paypal_mode = $settings->getPayPalMode();
             const acceptTerms = document.getElementById('acceptTerms');
             if (!acceptTerms.checked) {
                 acceptTerms.classList.add('is-invalid');
-                isValid = false;
+                allValid = false;
             }
             
-            if (!isValid) {
+            if (!allValid) {
                 showNotification('⚠️ Bitte füllen Sie alle Pflichtfelder aus und akzeptieren Sie die AGB.', 'warning');
-                showValidationErrors();
                 return;
             }
             
@@ -1612,7 +2146,12 @@ $paypal_mode = $settings->getPayPalMode();
                 },
                 body: JSON.stringify(addressData)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     console.log('Adresse erfolgreich gespeichert');
@@ -1621,7 +2160,8 @@ $paypal_mode = $settings->getPayPalMode();
                 }
             })
             .catch(error => {
-                console.error('Error saving address:', error);
+                // Silent fail - address saving is optional
+                console.log('Address saving skipped (not logged in or other error):', error.message);
             });
         }
         <?php endif; ?>
@@ -1631,7 +2171,7 @@ $paypal_mode = $settings->getPayPalMode();
             checkAllFieldsValid();
             
             // Event Listener für alle Eingabefelder hinzufügen
-            const inputFields = ['first_name', 'last_name', 'email', 'address', 'zip', 'city'];
+            const inputFields = ['firstName', 'lastName', 'email', 'address', 'zip', 'city'];
             inputFields.forEach(fieldId => {
                 const field = document.getElementById(fieldId);
                 if (field) {

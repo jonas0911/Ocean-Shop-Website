@@ -241,23 +241,23 @@ class PterodactylAPI {
     }
 
     /**
-     * Get game-specific configurations
+     * Get game-specific configurations from database settings
      */
     public function getGameConfig($gameName) {
-        $config = require __DIR__ . '/../config/pterodactyl.php';
-        $gameKey = strtolower($gameName);
+        require_once __DIR__ . '/SettingsManager.php';
+        $settings = new SettingsManager();
         
-        if (!isset($config['games'][$gameKey])) {
-            return null;
-        }
-        
-        $gameConfig = $config['games'][$gameKey];
+        // Standard Ocean Cloud Konfiguration
         return [
-            'egg_id' => $gameConfig['egg_id'],
-            'docker_image' => $gameConfig['docker_image'],
-            'startup_command' => $gameConfig['startup'],
-            'environment' => $gameConfig['environment'],
-            'default_port' => $gameConfig['default_port']
+            'egg_id' => (int)$settings->get('pterodactyl_egg_id', 5), // Standard Minecraft Egg
+            'docker_image' => $settings->get('pterodactyl_docker_image', 'ghcr.io/pterodactyl/yolks:java_17'),
+            'startup_command' => $settings->get('pterodactyl_startup', 'java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}'),
+            'environment' => [
+                'SERVER_JARFILE' => 'server.jar',
+                'VERSION' => 'latest',
+                'EULA' => 'true'
+            ],
+            'default_port' => null // Kein Standard Port - wird automatisch zugewiesen
         ];
     }
 }

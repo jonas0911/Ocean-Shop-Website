@@ -2,6 +2,8 @@
 session_start();
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/Cart.php';
+require_once __DIR__ . '/../includes/PterodactylAPI.php';
+require_once __DIR__ . '/../includes/User.php';
 
 header('Content-Type: application/json');
 
@@ -105,14 +107,57 @@ try {
     // Commit transaction
     $db->commit();
 
-    // Create server automatically if user is logged in
-    if (isset($_SESSION['user_id'])) {
+    // Create server automatically - für Demo-Orders oder eingeloggte User
+    $shouldCreateServer = isset($_SESSION['user_id']) || (isset($input['demo_order']) && $input['demo_order'] === true);
+    
+    if ($shouldCreateServer) {
         try {
-            require_once __DIR__ . '/../includes/ServerManager.php';
-            $serverManager = new ServerManager();
-            $serverResult = $serverManager->createServerFromOrder($orderId, $_SESSION['user_id']);
+            $pterodactylAPI = new PterodactylAPI();
             
-            if (!$serverResult['success']) {
+            // Für Demo-Orders: verwende die E-Mail als Owner
+            $ownerEmail = isset($_SESSION['user_id']) ? 
+                (new User())->getEmailById($_SESSION['user_id']) : 
+                $input['customer_data']['email'];
+            
+            // Erstelle Ocean Cloud Server mit festen Specs
+            $serverData = [
+                'name' => 'Ocean Cloud - ' . $input['customer_data']['first_name'] . ' ' . $input['customer_data']['last_name'],
+                'description' => isset($input['demo_order']) ? 'Demo Ocean Cloud Server' : 'Ocean Cloud Server',
+                'owner_email' => $ownerEmail,
+                'egg_id' => 1, // Default Minecraft Server egg
+                'environment' => [
+                    'SERVER_JARFILE' => 'server.jar',
+                    'VERSION' => 'latest'
+                ],
+                'limits' => [
+                    'memory' => 4096,      // 4GB RAM
+                    'swap' => 0,
+                    'disk' => 20480,       // 20GB Disk
+                    'io' => 500,
+                    'cpu' => 0             // Unlimited CPU
+                ],
+                'feature_limits' => [
+                    'databases' => 2,
+                    'allocations' => 1,
+                    'backups' => 5
+                ]
+            ];
+            
+            $serverResult = $pterodactylAPI->createServer($serverData);
+            
+            if ($serverResult['success']) {
+                // Server erfolgreich erstellt
+                error_log('Server created successfully for order ' . $orderId . ': Server ID ' . $serverResult['server_id']);
+                
+                if (isset($input['demo_order'])) {
+                    // Für Demo: Server-Details in Session speichern für Weiterleitung
+                    $_SESSION['demo_server_created'] = [
+                        'server_id' => $serverResult['server_id'],
+                        'server_name' => $serverData['name'],
+                        'order_id' => $orderId
+                    ];
+                }
+            } else {
                 error_log('Server creation failed for order ' . $orderId . ': ' . $serverResult['error']);
             }
         } catch (Exception $e) {

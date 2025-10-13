@@ -124,7 +124,6 @@ if ($_POST) {
                         <hr>
                         <div class="text-center">
                             <p>Noch kein Konto? <a href="/ocean/shop/register"><?php echo t('create_account'); ?></a></p>
-                            <p><strong>Test-Admin:</strong><br>Email: admin@example.com<br>Passwort: admin123</p>
                         </div>
                     </div>
                 </div>

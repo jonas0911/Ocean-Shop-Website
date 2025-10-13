@@ -107,6 +107,13 @@ class User {
         return null;
     }
 
+    public function getId() {
+        if ($this->isLoggedIn()) {
+            return $_SESSION['user_id'];
+        }
+        return null;
+    }
+
     public function getUserAddressData($userId) {
         try {
             $query = "SELECT first_name, last_name, address, city, zip, country FROM " . $this->table . " WHERE id = :id";
@@ -166,6 +173,20 @@ class User {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch(PDOException $e) {
             return [];
+        }
+    }
+
+    public function getEmailById($userId) {
+        try {
+            $query = "SELECT email FROM " . $this->table . " WHERE id = :user_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':user_id', $userId);
+            $stmt->execute();
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? $result['email'] : null;
+        } catch(PDOException $e) {
+            return null;
         }
     }
 
