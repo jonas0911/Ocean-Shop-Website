@@ -370,8 +370,16 @@ class PterodactylEggSelector {
     
     async assignNextAvailablePort(portField) {
         try {
+            // Get correct base path for API
+            let basePath = window.location.pathname;
+            if (basePath.includes('/ocean/shop/')) {
+                basePath = '/ocean/shop/';
+            } else {
+                basePath = '/';
+            }
+            
             console.log('Fetching next available port...');
-            const response = await fetch('/ocean/shop/get-next-port.php');
+            const response = await fetch(basePath + 'get-next-port.php');
             const data = await response.json();
             
             if (data.success) {

@@ -35,6 +35,7 @@ class GameServerShop {
         // Initialize RAM slider
         this.updateRAMDisplay();
         this.updatePrice();
+        this.updateSliderProgress();
         this.updateCartBadge();
     }
 
@@ -117,6 +118,7 @@ class GameServerShop {
 
         this.updateRAMDisplay();
         this.updatePrice();
+        this.updateSliderProgress();
         this.enableConfigurator();
     }
 
@@ -139,6 +141,7 @@ class GameServerShop {
         this.selectedRAM = parseInt(value);
         this.updateRAMDisplay();
         this.updatePrice();
+        this.updateSliderProgress();
     }
 
     updateRAMDisplay() {
@@ -146,6 +149,25 @@ class GameServerShop {
         if (display) {
             display.textContent = `${this.selectedRAM} GB`;
         }
+    }
+    
+    updateSliderProgress() {
+        const ramSlider = document.getElementById('ramSlider');
+        if (!ramSlider) return;
+        
+        const min = parseFloat(ramSlider.min) || 0;
+        const max = parseFloat(ramSlider.max) || 100;
+        const value = parseFloat(ramSlider.value) || 0;
+        
+        // Calculate percentage
+        const percentage = ((value - min) / (max - min)) * 100;
+        
+        // Update slider background with gradient showing progress
+        ramSlider.style.background = `linear-gradient(90deg, 
+            var(--ocean-blue) 0%, 
+            var(--ocean-light) ${percentage}%, 
+            #ddd ${percentage}%, 
+            #ddd 100%)`;
     }
 
     selectDuration(e) {
@@ -225,7 +247,15 @@ class GameServerShop {
         formData.append('ram', this.selectedRAM);
         formData.append('duration', this.selectedDuration);
 
-        fetch('/api/add-to-cart', {
+        // Get correct base path for API
+        let basePath = window.location.pathname;
+        if (basePath.includes('/ocean/shop/')) {
+            basePath = '/ocean/shop/';
+        } else {
+            basePath = '/';
+        }
+        
+        fetch(basePath + 'api/add-to-cart', {
             method: 'POST',
             body: formData
         })
@@ -307,8 +337,16 @@ class GameServerShop {
     }
 
     updateCartBadge() {
+        // Get correct base path for API
+        let basePath = window.location.pathname;
+        if (basePath.includes('/ocean/shop/')) {
+            basePath = '/ocean/shop/';
+        } else {
+            basePath = '/';
+        }
+        
         // Fetch real cart count from server
-        fetch('/api/get-cart-count', {
+        fetch(basePath + 'api/get-cart-count', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -516,8 +554,16 @@ class PayPalIntegration {
     }
 
     handlePaymentSuccess(details) {
+        // Get correct base path for API
+        let basePath = window.location.pathname;
+        if (basePath.includes('/ocean/shop/')) {
+            basePath = '/ocean/shop/';
+        } else {
+            basePath = '/';
+        }
+        
         // Send payment details to server
-        fetch('/api/payment-success.php', {
+        fetch(basePath + 'api/payment-success.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -660,4 +706,11 @@ class NavbarController {
 // Initialize navbar controller when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new NavbarController();
+});
+
+// Make shop instance globally accessible for dynamic game loading
+let gameShop = null;
+document.addEventListener('DOMContentLoaded', () => {
+    gameShop = new GameServerShop();
+    window.gameShop = gameShop;
 });

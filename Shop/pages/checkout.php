@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/URLHelper.php';
 require_once __DIR__ . '/../includes/LanguageManager.php';
 require_once __DIR__ . '/../includes/User.php';
 require_once __DIR__ . '/../includes/Cart.php';
@@ -43,14 +44,24 @@ $paypal_client_id = $settings->getPayPalClientId();
 $paypal_mode = $settings->getPayPalMode();
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo $lang->getCurrentLanguage(); ?>" data-theme="light">
+<html lang="<?php echo $lang->getCurrentLanguage(); ?>">
 <head>
+    <!-- CRITICAL: Theme MUST load BEFORE any styling to prevent flash -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('ocean-theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemTheme;
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo t('checkout'); ?> - Ocean Hosting</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="/ocean/shop/assets/css/style.css" rel="stylesheet">
+    <link href="<?php echo url('assets/css/style.css'); ?>" rel="stylesheet">
     
     <!-- PayPal SDK -->
     <script src="https://www.paypal.com/sdk/js?client-id=<?php echo $paypal_client_id; ?>&currency=EUR&intent=capture"></script>
@@ -58,7 +69,7 @@ $paypal_mode = $settings->getPayPalMode();
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="/ocean/shop">
+            <a class="navbar-brand" href="<?php echo url(); ?>">
                 <i class="fas fa-waves me-2"></i>Ocean Hosting
             </a>
             
@@ -69,13 +80,13 @@ $paypal_mode = $settings->getPayPalMode();
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/ocean/shop"><?php echo t('home'); ?></a>
+                        <a class="nav-link" href="<?php echo url(); ?>"><?php echo t('home'); ?></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/ocean/shop/cart"><?php echo t('cart'); ?></a>
+                        <a class="nav-link" href="<?php echo url('cart'); ?>"><?php echo t('cart'); ?></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/ocean/shop/checkout"><?php echo t('checkout'); ?></a>
+                        <a class="nav-link active" href="<?php echo url('checkout'); ?>"><?php echo t('checkout'); ?></a>
                     </li>
                 </ul>
                 

@@ -30,7 +30,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #90CDF4;
+    background: #f8f9fa;
     min-height: 100vh;
     /* Textauswahl deaktivieren */
     -webkit-user-select: none;
@@ -39,23 +39,12 @@ body {
     user-select: none;
 }
 
-/* Ocean Wave Animation */
+/* Ocean Wave Animation - DEAKTIVIERT für bessere Performance und Responsive Design */
+/*
 body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" fill="rgba(83,166,231,0.1)"/></svg>') repeat-x;
-    z-index: -1;
-    animation: wave 20s ease-in-out infinite;
+    display: none;
 }
-
-@keyframes wave {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(-50px); }
-}
+*/
 
 /* Header */
 .navbar {
@@ -192,24 +181,50 @@ body::before {
         display: none !important;
     }
     
-    .shop-dropdown {
+    /* All dropdowns in mobile navbar */
+    .navbar-collapse .dropdown-menu {
         position: static !important;
         float: none !important;
-        width: auto !important;
-        margin-top: 0 !important;
+        width: 100% !important;
+        margin: 0.5rem 0 !important;
         background: rgba(255,255,255,0.1) !important;
         border: 1px solid rgba(255,255,255,0.2) !important;
         box-shadow: none !important;
         border-radius: 8px !important;
     }
     
-    .shop-dropdown .dropdown-item {
-        margin: 1px 4px !important;
-        padding: 8px 12px !important;
-        border-radius: 4px !important;
+    .shop-dropdown {
+        background: rgba(255,255,255,0.1) !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
     }
     
-    [data-theme="dark"] .shop-dropdown {
+    .shop-dropdown .dropdown-item,
+    .dropdown-menu .dropdown-item {
+        color: white !important;
+        margin: 2px 4px !important;
+        padding: 10px 12px !important;
+        border-radius: 6px !important;
+        transition: background 0.2s ease !important;
+    }
+    
+    .shop-dropdown .dropdown-item:hover,
+    .dropdown-menu .dropdown-item:hover,
+    .shop-dropdown .dropdown-item:active,
+    .dropdown-menu .dropdown-item:active {
+        background: rgba(255,255,255,0.2) !important;
+        color: white !important;
+    }
+    
+    /* Theme toggle button fix for mobile */
+    .navbar-nav .nav-item .btn {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0;
+        text-align: center;
+    }
+    
+    [data-theme="dark"] .shop-dropdown,
+    [data-theme="dark"] .dropdown-menu {
         background: rgba(45, 55, 72, 0.8) !important;
         border: 1px solid rgba(74, 85, 104, 0.5) !important;
     }
@@ -283,13 +298,15 @@ body::before {
 /* Server Configurator */
 .configurator-card {
     background: #2a7bc4;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    padding: 2rem;
-    margin-top: -50px;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    padding: 3rem;
     position: relative;
     z-index: 10;
     color: white;
+    max-width: 1400px;
+    margin: 0 auto;
+    will-change: auto; /* Prevent scroll jank */
 }
 
 .configurator-card h2,
@@ -510,10 +527,35 @@ body::before {
     border-radius: 4px;
     background: #ddd;
     outline: none;
+    -webkit-appearance: none;
     appearance: none;
 }
 
+/* Track - der ausgefüllte Bereich */
+.ram-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--ocean-blue) 0%, var(--ocean-light) 100%);
+}
+
+.ram-slider::-moz-range-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--ocean-blue) 0%, var(--ocean-light) 100%);
+    border: none;
+}
+
+/* Progress - der gefüllte Teil links vom Thumb */
+.ram-slider::-moz-range-progress {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--ocean-blue) 0%, var(--ocean-light) 100%);
+}
+
 .ram-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
     appearance: none;
     width: 25px;
     height: 25px;
@@ -521,6 +563,7 @@ body::before {
     background: var(--primary-color);
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,123,255,0.3);
+    margin-top: -8px; /* Center thumb on track */
 }
 
 .ram-slider::-moz-range-thumb {

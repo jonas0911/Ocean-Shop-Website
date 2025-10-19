@@ -128,8 +128,18 @@ $db = $database->getConnection();
 $users = $db->query("SELECT id, name, email, is_admin, created_at, first_name, last_name, address, city, zip, country FROM users ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
-<html data-theme="light">
+<html>
 <head>
+    <!-- CRITICAL: Theme MUST load BEFORE any styling to prevent flash -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('ocean-theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemTheme;
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo t('users_management'); ?> - Ocean Hosting Admin</title>

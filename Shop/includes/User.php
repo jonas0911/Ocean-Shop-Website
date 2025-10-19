@@ -50,6 +50,35 @@ class User {
                 session_start();
             }
             
+            // Rate limiting - max 5 attempts per 15 minutes per IP
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+            $rateLimitKey = 'login_attempts_' . md5($ip);
+            
+            if (!isset($_SESSION[$rateLimitKey])) {
+                $_SESSION[$rateLimitKey] = ['count' => 0, 'time' => time()];
+            }
+            
+            // Reset counter if 15 minutes passed
+            if (time() - $_SESSION[$rateLimitKey]['time'] > 900) {
+                $_SESSION[$rateLimitKey] = ['count' => 0, 'time' => time()];
+            }
+            
+            // Check rate limit
+            if ($_SESSION[$rateLimitKey]['count'] >= 5) {
+                return ['success' => false, 'message' => 'Zu viele Login-Versuche. Bitte warten Sie 15 Minuten.'];
+            }
+            
+            // Input validation
+            if (empty($email) || empty($password)) {
+                $_SESSION[$rateLimitKey]['count']++;
+                return ['success' => false, 'message' => 'E-Mail und Passwort erforderlich'];
+            }
+            
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $_SESSION[$rateLimitKey]['count']++;
+                return ['success' => false, 'message' => 'Ungültige E-Mail-Adresse'];
+            }
+            
             // Use direct query due to SQLite PDO prepared statement bug
             $escapedEmail = $this->conn->quote($email);
             $query = "SELECT id, name, email, password, is_admin FROM " . $this->table . " WHERE email = " . $escapedEmail;
@@ -60,19 +89,30 @@ class User {
                 $user = $users[0];
                 
                 if (password_verify($password, $user['password'])) {
+                    // Successful login - reset rate limit
+                    unset($_SESSION[$rateLimitKey]);
+                    
+                    // Regenerate session ID for security
+                    session_regenerate_id(true);
+                    
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['user_name'] = $user['name'];
                     $_SESSION['user_email'] = $user['email'];
                     $_SESSION['is_admin'] = $user['is_admin'];
+                    $_SESSION['login_time'] = time();
                     
-                    return ['success' => true, 'message' => 'Login successful'];
+                    return ['success' => true, 'message' => 'Login erfolgreich'];
                 }
             }
             
-            return ['success' => false, 'message' => 'Invalid credentials'];
+            // Failed login - increment counter
+            $_SESSION[$rateLimitKey]['count']++;
+            
+            return ['success' => false, 'message' => 'Ungültige Anmeldedaten'];
             
         } catch(PDOException $e) {
-            return ['success' => false, 'message' => 'Database error: ' . $e->getMessage()];
+            error_log("Login error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Fehler bei der Anmeldung. Bitte versuchen Sie es später erneut.'];
         }
     }
 

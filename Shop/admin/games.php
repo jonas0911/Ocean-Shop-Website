@@ -120,8 +120,18 @@ if ($_POST) {
 $games = $gameManager->getAllGames();
 ?>
 <!DOCTYPE html>
-<html data-theme="light">
+<html>
 <head>
+    <!-- CRITICAL: Theme MUST load BEFORE any styling to prevent flash -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('ocean-theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemTheme;
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $lang->get('games_management'); ?> - Ocean Hosting Admin</title>

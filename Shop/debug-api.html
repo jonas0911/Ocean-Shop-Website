@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Debug Test</title>
+</head>
+<body>
+    <h1>API Debug Test</h1>
+    <button id="testCart">Test Cart API</button>
+    <button id="testLanguage">Test Language API</button>
+    <div id="results"></div>
+
+    <script>
+        function getBasePath() {
+            let basePath = window.location.pathname;
+            if (basePath.includes('/ocean/shop/')) {
+                basePath = '/ocean/shop/';
+            } else {
+                basePath = '/';
+            }
+            return basePath;
+        }
+
+        document.getElementById('testCart').addEventListener('click', async () => {
+            const basePath = getBasePath();
+            const url = basePath + 'api/get-cart-count';
+            
+            console.log('Testing URL:', url);
+            document.getElementById('results').innerHTML += `<p>Testing: ${url}</p>`;
+            
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                console.log('Response:', text);
+                document.getElementById('results').innerHTML += `<p>Response: ${text}</p>`;
+                
+                try {
+                    const json = JSON.parse(text);
+                    document.getElementById('results').innerHTML += `<p>JSON OK: ${JSON.stringify(json)}</p>`;
+                } catch (e) {
+                    document.getElementById('results').innerHTML += `<p>JSON Error: ${e.message}</p>`;
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                document.getElementById('results').innerHTML += `<p>Fetch Error: ${error.message}</p>`;
+            }
+        });
+
+        document.getElementById('testLanguage').addEventListener('click', async () => {
+            const basePath = getBasePath();
+            const url = basePath + 'api/change-language';
+            
+            console.log('Testing URL:', url);
+            document.getElementById('results').innerHTML += `<p>Testing: ${url}</p>`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({language: 'de'})
+                });
+                const text = await response.text();
+                console.log('Response:', text);
+                document.getElementById('results').innerHTML += `<p>Response: ${text}</p>`;
+            } catch (error) {
+                console.error('Fetch error:', error);
+                document.getElementById('results').innerHTML += `<p>Fetch Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

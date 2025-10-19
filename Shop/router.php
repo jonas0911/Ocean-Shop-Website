@@ -32,7 +32,8 @@ switch ($path) {
         
     case 'ocean/shop':
     case 'ocean/shop/':
-        // Main shop page
+        // Main shop page - load directly without router
+        $_ROUTER_PROCESSED = true; // Prevent infinite loop
         require_once 'index.php';
         break;
         
@@ -114,6 +115,11 @@ switch ($path) {
     case 'api/logout':
     case 'ocean/shop/api/logout':
         require_once 'api/logout.php';
+        break;
+        
+    case 'api/get-games':
+    case 'ocean/shop/api/get-games':
+        require_once 'api/get-games.php';
         break;
         
     case 'api/add-to-cart':

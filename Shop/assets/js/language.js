@@ -23,8 +23,16 @@
                 // Disable the link temporarily
                 this.style.pointerEvents = 'none';
                 
+                // Get correct base path for API
+                let basePath = window.location.pathname;
+                if (basePath.includes('/ocean/shop/')) {
+                    basePath = '/ocean/shop/';
+                } else {
+                    basePath = '/';
+                }
+                
                 // Force language change by sending AJAX first, then redirect
-                fetch('/ocean/shop/api/change-language', {
+                fetch(basePath + 'api/change-language', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -38,16 +46,13 @@
                 .then(data => {
                     console.log('API Response data:', data);
                     if (data.success) {
-                        // Force the URL parameter and reload
-                        const currentUrl = new URL(window.location.href);
-                        currentUrl.searchParams.set('lang', lang);
-                        currentUrl.searchParams.set('_t', Date.now()); // Cache buster
-                        console.log('Redirecting to:', currentUrl.toString());
-                        window.location.href = currentUrl.toString();
+                        // Reload page without changing URL
+                        console.log('Language changed successfully, reloading page');
+                        window.location.reload();
                     } else {
                         console.error('Language change failed:', data.message);
-                        // Fallback: just redirect with parameter
-                        const currentUrl = new URL(window.location.href);
+                        // Fallback: just reload page
+                        window.location.reload();
                         currentUrl.searchParams.set('lang', lang);
                         window.location.href = currentUrl.toString();
                     }
